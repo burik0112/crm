@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-!8$jb&w@@7hrsx_jiwdi+-^86&%u_tzn42xn*d^tq&8)3p25%@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://sultanacademy.pythonanywhere.com/']
 
 
 # Application definition
@@ -136,3 +136,6 @@ TELEGRAM_CHAT_ID = "SIZNING_CHAT_ID"
 LOGIN_URL = 'login' # Login sahifasining nomi
 LOGIN_REDIRECT_URL = 'dashboard' # Kirgandan keyin qayerga o'tishi
 LOGOUT_REDIRECT_URL = 'login'
+
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
