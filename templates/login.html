@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>EduCRM | Tizimga kirish</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --bg: #090a0f; --card: #13161f; --accent: #3e81f6; --border: #1e293b; }
+        body { background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-card { background: var(--card); border: 1px solid var(--border); padding: 40px; border-radius: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; }
+        .logo { font-size: 24px; font-weight: 800; margin-bottom: 30px; color: var(--accent); display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .input-group { text-align: left; margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 13px; color: #94a3b8; }
+        .glass-input { width: 100%; background: #0b0e14; border: 1px solid var(--border); padding: 12px 15px; border-radius: 12px; color: white; outline: none; box-sizing: border-box; }
+        .glass-input:focus { border-color: var(--accent); }
+        .btn-login { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(62, 129, 246, 0.3); }
+        .error-msg { background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 10px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo"><i data-lucide="graduation-cap"></i> EduCRM</div>
+        <h2 style="margin-bottom: 10px;">Xush kelibsiz!</h2>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 30px;">Davom etish uchun profilingizga kiring</p>
+
+        {% if error %} <div class="error-msg">{{ error }}</div> {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="input-group">
+                <label>Telefon raqami</label>
+                <input type="text" name="phone" class="glass-input" placeholder="+998 90 123 45 67" required>
+            </div>
+            <div class="input-group">
+                <label>Parol</label>
+                <input type="password" name="password" class="glass-input" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-login">Tizimga kirish</button>
+        </form>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

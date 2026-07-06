@@ -1,0 +1,440 @@
+{% extends 'base.html' %}
+
+{% block title %}O'quvchilar Boshqaruvi | EduCRM{% endblock %}
+
+{% block content %}
+<style>
+    /* Premium Ranglar va Effektlar */
+    :root {
+        --card-glow: rgba(62, 129, 246, 0.05);
+    }
+
+    /* Statistika Kartalari */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-bottom: 35px;
+    }
+
+    .stat-card-premium {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        padding: 25px;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        transition: 0.3s;
+    }
+
+    .stat-card-premium:hover {
+        border-color: var(--accent-blue);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        transform: translateY(-3px);
+    }
+
+    .stat-card-premium i {
+        position: absolute;
+        right: -10px;
+        bottom: -10px;
+        font-size: 90px;
+        opacity: 0.03;
+        color: white;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 8px 0;
+        display: block;
+    }
+
+    /* Jadval Dizayni */
+    .table-container-premium {
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        overflow-x: auto;
+        padding: 15px;
+    }
+
+    .premium-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        min-width: 850px;
+    }
+
+    .premium-table th {
+        padding: 12px 18px;
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .premium-table tbody tr {
+        background: rgba(255,255,255,0.02);
+        transition: 0.2s;
+    }
+
+    .premium-table tbody tr:hover {
+        background: rgba(255,255,255,0.05);
+    }
+
+    .premium-table td {
+        padding: 14px 18px;
+    }
+
+    .premium-table td:first-child { border-radius: 12px 0 0 12px; }
+    .premium-table td:last-child { border-radius: 0 12px 12px 0; }
+
+    /* Avatar va Badge */
+    .avatar-box {
+        width: 38px; height: 38px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; color: white; font-size: 14px;
+    }
+
+    .payment-badge {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--accent-green);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13px;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .day-badge {
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: rgba(168, 85, 247, 0.1);
+        color: var(--accent-purple);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; border: 1px solid rgba(168, 85, 247, 0.3);
+        font-size: 13px;
+    }
+
+    /* MODAL STYLES (TUZATILGAN QISMI) */
+    .modal-overlay {
+        display: none; /* Standart holatda yashirin turadi */
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .modal-box {
+        background: var(--card-bg, #13161f);
+        border: 1px solid var(--border-color, #1e293b);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 480px;
+        padding: 25px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        animation: modalAnim 0.25s ease-out;
+    }
+
+    @keyframes modalAnim {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-close {
+        cursor: pointer;
+        color: var(--text-muted);
+        background: none;
+        border: none;
+        font-size: 24px;
+        line-height: 1;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+
+    .glass-input {
+        background: rgba(255,255,255,0.03) !important;
+        border: 1px solid var(--border-color) !important;
+        padding: 12px 16px !important;
+        border-radius: 10px !important;
+        color: white !important;
+        width: 100%;
+        box-sizing: border-box;
+        transition: 0.3s;
+        outline: none;
+    }
+
+    .glass-input:focus {
+        border-color: var(--accent-blue) !important;
+        background: rgba(255,255,255,0.06) !important;
+    }
+
+    .btn-save {
+        background: var(--accent-blue);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-save:hover { opacity: 0.9; }
+
+    .action-flex {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-circle {
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: rgba(255,255,255,0.03);
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-circle:hover { color: white; background: var(--accent-blue); border-color: var(--accent-blue); }
+    .btn-delete:hover { background: #ef4444; border-color: #ef4444; }
+</style>
+
+<!-- Statistika -->
+<div class="stats-grid">
+    <div class="stat-card-premium">
+        <i data-lucide="users"></i>
+        <span style="color: var(--text-muted)">Aktiv O'quvchilar</span>
+        <span class="stat-value text-blue">{{ total_students }} ta</span>
+        <div style="font-size: 12px; color: var(--accent-green);">● Hozirda o'qimoqda</div>
+    </div>
+    <div class="stat-card-premium">
+        <i data-lucide="trending-up"></i>
+        <span style="color: var(--text-muted)">Kutilayotgan tushum</span>
+        <span class="stat-value" style="color: var(--accent-blue);">
+            {{ total_expected|floatformat:0 }} <small style="font-size: 14px;">so'm</small>
+        </span>
+        <div style="font-size: 11px; color: var(--text-muted);">Ushbu oy uchun reja</div>
+    </div>
+
+    <!-- To'landi -->
+    <div class="stat-card-premium" style="border-left: 4px solid var(--accent-green);">
+        <i data-lucide="check-circle"></i>
+        <span style="color: var(--text-muted)">To'landi (Joriy oy)</span>
+        <span class="stat-value" style="color: var(--accent-green);">
+            {{ total_paid|floatformat:0 }} <small style="font-size: 14px;">so'm</small>
+        </span>
+        <div style="font-size: 11px; color: var(--accent-green);">Muvaffaqiyatli tushumlar</div>
+    </div>
+
+    <!-- Qarzdorlik -->
+    <div class="stat-card-premium" style="border-left: 4px solid #ef4444;">
+        <i data-lucide="alert-circle"></i>
+        <span style="color: var(--text-muted)">Umumiy Qarzdorlik</span>
+        <span class="stat-value" style="color: #ef4444;">
+            {{ total_debt|floatformat:0 }} <small style="font-size: 14px;">so'm</small>
+        </span>
+        <div style="font-size: 11px; color: #ef4444;">Yig'ilishi kerak bo'lgan summa</div>
+    </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
+    <form method="GET" style="flex: 1; max-width: 400px; position: relative;">
+        <i data-lucide="search" style="position: absolute; left: 15px; top: 12px; color: var(--text-muted);" size="18"></i>
+        <input type="text" name="q" value="{{ query }}" class="glass-input" placeholder="Ism yoki telefon..." style="padding-left: 45px;">
+    </form>
+    <button onclick="openAddModal()" class="btn-save" style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+        <i data-lucide="plus-circle" size="18"></i> Yangi o'quvchi
+    </button>
+</div>
+
+<!-- Jadval -->
+<div class="table-container-premium">
+    <table class="premium-table">
+        <thead>
+            <tr>
+                <th>O'quvchi</th>
+                <th>Aloqa</th>
+                <th>Yo'nalish</th>
+                <th>Sana</th>
+                <th>To'lov kuni</th>
+                <th>Summa</th>
+                <th style="text-align: right;">Amallar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="avatar-box">{{ student.full_name|slice:":1"|upper }}</div>
+                        <div>
+                            <div style="font-weight: 600;">{{ student.full_name }}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">ID: #{{ student.id }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td><span style="color: var(--text-muted); font-size: 13px;">{{ student.phone }}</span></td>
+                <td><span style="color: var(--accent-blue); font-weight: 500;">{{ student.direction }}</span></td>
+                <td><span style="color: var(--text-muted); font-size: 13px;">{{ student.enrollment_date|date:"d.m.Y" }}</span></td>
+                <td><span style="color: var(--accent-blue); font-weight: 500;">{{ student.next_payment_date }}</span></td>
+                <td><span class="payment-badge">{{ student.monthly_amount|floatformat:0 }} so'm</span></td>
+                <td>
+                    <div class="action-flex" style="justify-content: flex-end;">
+                        <button type="button" class="btn-circle" title="Tahrirlash" onclick="openEditModal({{ student.pk }}, '{{ student.full_name|escapejs }}', '{{ student.phone|escapejs }}', '{{ student.direction|escapejs }}', '{{ student.monthly_amount }}', '{{ student.payment_day }}')">
+                            <i data-lucide="pencil" size="14"></i>
+                        </button>
+                        <button type="button" class="btn-circle btn-delete" title="O'chirish" onclick="openDeleteModal({{ student.pk }}, '{{ student.full_name|escapejs }}')">
+                            <i data-lucide="trash-2" size="14"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" style="text-align: center; padding: 50px; color: var(--text-muted);">O'quvchilar ro'yxati bo'sh</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- MODAL: ADD / EDIT -->
+<div class="modal-overlay" id="studentModal">
+    <div class="modal-box">
+        <div class="modal-header-row">
+            <h2 id="modalTitle" style="font-size: 18px; margin: 0;">Yangi o'quvchi</h2>
+            <button type="button" class="modal-close" onclick="closeModal('studentModal')">&times;</button>
+        </div>
+        <form method="POST" id="studentForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>To'liq Ism Familiya</label>
+                <input type="text" name="full_name" id="id_full_name" class="glass-input" required placeholder="Masalan: Ali Valiyev">
+            </div>
+            <div class="form-group">
+                <label>Telefon raqami</label>
+                <input type="text" name="phone" id="id_phone" class="glass-input" required placeholder="+998 90 123 45 67">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Yo'nalish (Kurs)</label>
+                    <input type="text" name="direction" id="id_direction" class="glass-input" required placeholder="Ingliz tili">
+                </div>
+                <div class="form-group">
+                    <label>To'lov kuni (1-31)</label>
+                    <input type="number" name="payment_day" id="id_payment_day" class="glass-input" min="1" max="31" required placeholder="5">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Oylik to'lov summasi (so'm)</label>
+                <input type="number" name="monthly_amount" id="id_monthly_amount" class="glass-input" placeholder="1000000" step="1000" required>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button type="button" class="glass-input" style="flex: 1; cursor: pointer;" onclick="closeModal('studentModal')">Bekor qilish</button>
+                <button type="submit" class="btn-save" id="submitBtnText" style="flex: 1;">Saqlash</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: DELETE -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box" style="max-width: 400px; text-align: center;">
+        <i data-lucide="alert-triangle" style="color: #ef4444; width: 48px; height: 48px; margin-bottom: 15px;"></i>
+        <h2 style="font-size: 18px; margin-bottom: 10px;">O'chirishni tasdiqlaysizmi?</h2>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+            <b id="deleteStudentName" style="color: white;"></b> ro'yxatdan o'chiriladi.
+        </p>
+        <form method="POST" id="deleteForm">
+            {% csrf_token %}
+            <div style="display: flex; gap: 10px;">
+                <button type="button" class="glass-input" style="flex: 1; cursor: pointer;" onclick="closeModal('deleteModal')">Bekor qilish</button>
+                <button type="submit" class="btn-save" style="background: #ef4444; flex: 1;">O'chirish</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const ADD_URL = "{% url 'student_add' %}";
+    const EDIT_URL_TEMPLATE = "{% url 'student_edit' 0 %}";
+    const DELETE_URL_TEMPLATE = "{% url 'student_delete' 0 %}";
+
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function openAddModal() {
+        document.getElementById('modalTitle').innerText = "Yangi o'quvchi qo'shish";
+        document.getElementById('submitBtnText').innerText = "Qo'shish";
+        document.getElementById('studentForm').action = ADD_URL;
+        document.getElementById('studentForm').reset();
+        openModal('studentModal');
+    }
+
+    function openEditModal(pk, fullName, phone, direction, amount, paymentDay) {
+        document.getElementById('modalTitle').innerText = "O'quvchini tahrirlash";
+        document.getElementById('submitBtnText').innerText = "Saqlash";
+        document.getElementById('studentForm').action = EDIT_URL_TEMPLATE.replace('0', pk);
+
+        document.getElementById('id_full_name').value = fullName;
+        document.getElementById('id_phone').value = phone;
+        document.getElementById('id_direction').value = direction;
+        // Summadagi vergullarni to'g'irlash
+        document.getElementById('id_monthly_amount').value = parseFloat(amount.toString().replace(',', '.'));
+        document.getElementById('id_payment_day').value = paymentDay;
+
+        openModal('studentModal');
+    }
+
+    function openDeleteModal(pk, fullName) {
+        document.getElementById('deleteStudentName').innerText = fullName;
+        document.getElementById('deleteForm').action = DELETE_URL_TEMPLATE.replace('0', pk);
+        openModal('deleteModal');
+    }
+
+    // Fon qismiga bosganda modalni yopish
+    document.querySelectorAll('.modal-overlay').forEach(function (overlay) {
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) {
+                overlay.style.display = 'none';
+            }
+        });
+    });
+
+    lucide.createIcons();
+</script>
+{% endblock %}
