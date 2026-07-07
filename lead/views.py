@@ -125,7 +125,7 @@ def add_lead(request):
             comment=request.POST.get('comment'),
             manager=request.user
         )
-        return redirect('lead_home') # O'zingizni URL nomingizga qarang
+        return redirect('lead') # O'zingizni URL nomingizga qarang
 
 
 # --- 3. STUDENTLAR BILAN ISHLASH (Boss, Manager, Accountant) ---
