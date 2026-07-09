@@ -1,5 +1,7 @@
 import calendar
 from datetime import timedelta, date
+
+import pandas as pd
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,9 +14,10 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from accounts.models import User
-from accounts.views import role_required # Sizda bor bo'lgan dekorator
+from accounts.views import role_required  # Sizda bor bo'lgan dekorator
 from .forms import StudentForm
 from .models import Client, Student
+
 
 # --- 1. DASHBOARD (Hamma kirganlar uchun) ---
 @login_required
@@ -80,6 +83,7 @@ def lead_page(request):
     }
     return render(request, 'lead_home.html', context)
 
+
 @login_required
 @role_required(allowed_roles=['boss', 'manager'])
 @require_POST
@@ -112,20 +116,37 @@ def change_status(request):
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
+
 @login_required
 @role_required(allowed_roles=['boss', 'manager'])
 def add_lead(request):
     if request.method == "POST":
+        # Formadan ma'lumotlarni olish
+        name = request.POST.get('name')
+        phone = request.POST.get('phone')
+        for_whom = request.POST.get('for_whom')
+        is_from_tashkent = request.POST.get('is_from_tashkent')
+        course = request.POST.get('course')
+        source = request.POST.get('source')
+        status = request.POST.get('status', 'new')
+        comment = request.POST.get('comment')
+
+        # Bazaga saqlash
         Client.objects.create(
-            name=request.POST.get('name'),
-            phone=request.POST.get('phone'),
-            course=request.POST.get('course'),
-            source=request.POST.get('source'),
-            status=request.POST.get('status', 'new'),
-            comment=request.POST.get('comment'),
-            manager=request.user
+            name=name,
+            phone=phone,
+            for_whom=for_whom,
+            is_from_tashkent=is_from_tashkent,
+            course=course,
+            source=source,
+            status=status,
+            comment=comment,
+            manager=request.user  # Leadni qo'shgan odam manager bo'ladi
         )
-        return redirect('lead') # O'zingizni URL nomingizga qarang
+
+        return redirect('lead')  # Leadlar ro'yxatiga qaytish
+
+    return redirect('lead')
 
 
 # --- 3. STUDENTLAR BILAN ISHLASH (Boss, Manager, Accountant) ---
@@ -140,13 +161,16 @@ def student_list_view(request):
 
     total_expected = students.aggregate(Sum('monthly_amount'))['monthly_amount__sum'] or 0
     today = date.today()
-    total_paid = students.filter(next_payment_date__gt=date(today.year, today.month, 28)).aggregate(Sum('monthly_amount'))['monthly_amount__sum'] or 0
+    total_paid = \
+    students.filter(next_payment_date__gt=date(today.year, today.month, 28)).aggregate(Sum('monthly_amount'))[
+        'monthly_amount__sum'] or 0
 
     context = {
         'students': students, 'total_expected': total_expected, 'total_paid': total_paid,
         'total_debt': max(0, total_expected - total_paid), 'total_students': students.count(), 'query': query,
     }
     return render(request, 'students.html', context)
+
 
 @login_required
 @role_required(allowed_roles=['boss', 'manager'])
@@ -163,6 +187,7 @@ def student_create_view(request):
         form = StudentForm()
     return render(request, 'student_form.html', {'form': form, 'is_edit': False})
 
+
 @login_required
 @role_required(allowed_roles=['boss', 'manager'])
 def student_update_view(request, pk):
@@ -176,6 +201,7 @@ def student_update_view(request, pk):
     else:
         form = StudentForm(instance=student)
     return render(request, 'student_form.html', {'form': form, 'is_edit': True, 'student': student})
+
 
 @login_required
 @role_required(allowed_roles=['boss'])
@@ -197,10 +223,13 @@ def billing_view(request):
     three_days_later = today + timedelta(days=3)
 
     debtors = Student.objects.filter(next_payment_date__lt=today, is_active=True).order_by('next_payment_date')
-    reminders_list = Student.objects.filter(next_payment_date__range=[today, three_days_later], is_active=True).order_by('next_payment_date')
+    reminders_list = Student.objects.filter(next_payment_date__range=[today, three_days_later],
+                                            is_active=True).order_by('next_payment_date')
 
     total_expected = Student.objects.filter(is_active=True).aggregate(Sum('monthly_amount'))['monthly_amount__sum'] or 0
-    total_paid = Student.objects.filter(is_active=True, next_payment_date__gt=date(today.year, today.month, 28)).aggregate(Sum('monthly_amount'))['monthly_amount__sum'] or 0
+    total_paid = \
+    Student.objects.filter(is_active=True, next_payment_date__gt=date(today.year, today.month, 28)).aggregate(
+        Sum('monthly_amount'))['monthly_amount__sum'] or 0
 
     context = {
         'debtors': debtors, 'reminders': reminders_list,
@@ -208,6 +237,7 @@ def billing_view(request):
         'total_debt': max(0, total_expected - total_paid), 'today': today,
     }
     return render(request, 'billing.html', context)
+
 
 @login_required
 @role_required(allowed_roles=['boss', 'accountant'])
@@ -221,3 +251,92 @@ def accept_payment(request, pk):
         student.next_payment_date = date.today() + relativedelta(months=1)
     student.save()
     return redirect('billing_view')
+
+
+@login_required
+@role_required(allowed_roles=['boss', 'manager'])
+def import_leads_excel(request):
+    if request.method == "POST" and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+
+        try:
+            # Excelni o'qish
+            df = pd.read_excel(excel_file)
+
+            # Ustun nomlaridagi ortiqcha bo'shliqlarni olib tashlaymiz
+            df.columns = [str(c).strip() for c in df.columns]
+
+            new_count = 0
+            skipped_count = 0
+
+            for index, row in df.iterrows():
+                # RASMGA ASOSLANGAN ANIQ USTUN NOMALARI:
+                # 1. ismingiz:
+                # 2. telefon_raqamingiz:
+                # 3. zargarlikga_kim_o'qimoqchi_o'zingiz_yoki_farzandingiz_
+                # 4. toshkent_shahridanmisiz?
+
+                raw_name = str(row.get('ismingiz:', 'nan')).strip()
+                raw_phone = str(row.get('telefon_raqamingiz:', 'nan')).strip()
+                raw_for_whom = str(row.get("zargarlikga_kim_o'qimoqchi_o'zingiz_yoki_farzandingiz_", 'nan')).strip()
+                raw_tashkent = str(row.get('toshkent_shahridanmisiz?', 'nan')).strip()
+
+                # Telefon raqami bo'sh bo'lsa tashlab ketamiz
+                if not raw_phone or raw_phone == 'nan' or raw_phone == "":
+                    continue
+
+                # TELEFONNI TOZALASH ( +998... dagi + ni va bo'shliqlarni olib tashlaymiz)
+                clean_phone = raw_phone.replace('+', '').replace(' ', '').replace('(', '').replace(')', '').replace('-',
+                                                                                                                    '')
+
+                # Agar Excelda raqam float bo'lib qolgan bo'lsa (998...0)
+                if "." in clean_phone:
+                    clean_phone = clean_phone.split(".")[0]
+
+                # BAZADA TEKSHIRISH (Duplikat raqam bo'lsa qo'shmaydi)
+                if not Client.objects.filter(phone=clean_phone).exists():
+                    Client.objects.create(
+                        name=raw_name if raw_name != 'nan' else "Ismsiz",
+                        phone=clean_phone,
+                        for_whom=raw_for_whom if raw_for_whom != 'nan' else "",
+                        is_from_tashkent=raw_tashkent if raw_tashkent != 'nan' else "",
+                        status='new',
+                        manager=request.user,
+                        source="Instagram Ads"  # Rasmga qarab shuni yozdim
+                    )
+                    new_count += 1
+                else:
+                    skipped_count += 1
+
+            messages.success(request,
+                             f"Import muvaffaqiyatli! {new_count} ta yangi lead qo'shildi, {skipped_count} ta duplikat tashlab ketildi.")
+
+        except Exception as e:
+            messages.error(request, f"Kutilmagan xato: {str(e)}")
+
+    return redirect('lead')
+
+
+
+@login_required
+@role_required(allowed_roles=['boss', 'manager'])
+def edit_lead(request, pk):
+    lead = get_object_or_404(Client, pk=pk)
+    if request.method == "POST":
+        lead.name = request.POST.get('name')
+        lead.phone = request.POST.get('phone')
+        lead.for_whom = request.POST.get('for_whom')
+        lead.is_from_tashkent = request.POST.get('is_from_tashkent')
+        lead.course = request.POST.get('course')
+        lead.source = request.POST.get('source')
+        lead.comment = request.POST.get('comment')
+        lead.save()
+        messages.success(request, f"{lead.name} ma'lumotlari yangilandi.")
+    return redirect('lead')
+
+
+@login_required
+def delete_lead(request, pk):
+    lead = get_object_or_404(Client, pk=pk)
+    lead.delete()
+    return redirect('lead')

@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import dashboard, lead_page, change_status, add_lead, student_list_view, student_create_view, \
-    student_update_view, student_delete_view, billing_view, accept_payment
+    student_update_view, student_delete_view, billing_view, accept_payment, import_leads_excel, delete_lead, edit_lead
 
 urlpatterns = [
 
@@ -20,6 +20,9 @@ urlpatterns = [
         name="change_status"
     ),
     path('lead/add/', add_lead, name='add_lead'),
+    path('lead/edit/<int:pk>/', edit_lead, name='edit_lead'),
+    path('leads/delete/<int:pk>/', delete_lead, name='delete_lead'),
+    path('leads/import/', import_leads_excel, name='import_leads'),
     # path('student_list/', student_list_view, name='student_list'),
     path('students/', student_list_view, name='student_list'),
     path('students/add/', student_create_view, name='student_add'),

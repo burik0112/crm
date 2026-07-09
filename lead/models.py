@@ -11,56 +11,27 @@ from accounts.models import User
 
 class Client(models.Model):
     STATUS = (
-
         ("new", "Yangi"),
         ("first class", "Birinchi dars"),
-
         ("viewed", "Ko'rilgan"),
-
         ("coming", "Aniq keladi"),
-
         ("cancel", "Rad etdi"),
-
         ("student", "O'quvchi"),
-
     )
 
-    name = models.CharField(
-        max_length=150
-    )
+    name = models.CharField(max_length=150)  # Ism
+    phone = models.CharField(max_length=20)  # Nomer
 
-    phone = models.CharField(
-        max_length=20
-    )
+    # YANGI MAYDONLAR
+    for_whom = models.CharField(max_length=100, blank=True, null=True)  # Kim uchun?
+    is_from_tashkent = models.CharField(max_length=50, blank=True, null=True)  # Toshkent shaxridanmisiz?
 
-    course = models.CharField(
-        max_length=100
-    )
-
-    source = models.CharField(
-        max_length=100,
-        blank=True
-    )
-
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS,
-        default="new"
-    )
-
-    manager = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True
-    )
-
-    comment = models.TextField(
-        blank=True
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    course = models.CharField(max_length=100, blank=True)
+    source = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS, default="new")
+    manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name

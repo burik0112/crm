@@ -2,97 +2,62 @@
 
 {% block content %}
 <style>
-    /* 1. RESPONSIVE DIZAYN UCHUN ASOSIY TUZATISHLAR */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-
+    /* SIZNING MAVJUD USLUBLARINGIZ (O'zgartirilmadi) */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
     @media (max-width: 768px) {
-        .toolbar-container {
-            flex-direction: column;
-            align-items: stretch;
-        }
-        .search-group {
-            flex-direction: column;
-        }
-        .glass-input, .glass-select {
-            max-width: 100% !important;
-            width: 100%;
-        }
-        main {
-            padding: 15px !important;
-        }
-        .sidebar {
-            display: none; /* Mobile menyuni alohida qilish kerak bo'ladi */
-        }
-        .content {
-            margin-left: 0 !important;
-            width: 100% !important;
-        }
+        .toolbar-container { flex-direction: column; align-items: stretch; }
+        .search-group { flex-direction: column; }
+        .glass-input, .glass-select { max-width: 100% !important; width: 100%; }
+        main { padding: 15px !important; }
+        .sidebar { display: none; }
+        .content { margin-left: 0 !important; width: 100% !important; }
     }
-
-    /* SIZNING MAVJUD USLUBLARINGIZ */
     .toolbar-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; gap: 15px; }
     .search-group { display: flex; gap: 12px; flex: 1; }
     .glass-input { background: var(--card-bg); border: 1px solid var(--border-color); color: white; padding: 12px 15px; border-radius: 12px; outline: none; width: 100%; max-width: 350px; transition: 0.3s; }
     .glass-input:focus { border-color: var(--accent-blue); }
     .glass-select { background: var(--card-bg); border: 1px solid var(--border-color); color: white; padding: 12px; border-radius: 12px; cursor: pointer; min-width: 180px; }
-
     .action-flex { display: flex; gap: 8px; justify-content: flex-end; }
-    .btn-circle { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-muted); transition: 0.3s; text-decoration: none; }
+    .btn-circle { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-muted); transition: 0.3s; text-decoration: none; cursor: pointer; }
     .btn-circle:hover { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
     .btn-delete:hover { background: #ef4444; border-color: #ef4444; }
-
     .status-dynamic-select { border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; text-align: center; transition: all 0.3s ease; min-width: 130px; }
-
-    /* Status ranglari */
     .st-new { background: rgba(62, 129, 246, 0.15); color: #3e81f6; }
     .st-first { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
     .st-viewed { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
     .st-coming { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
     .st-cancel { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
     .st-student { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
-
-    /* Tooltip */
     .comment-container { position: relative; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-muted); }
     .comment-tooltip { visibility: hidden; opacity: 0; width: 200px; background-color: var(--card-bg); color: #fff; border: 1px solid var(--accent-blue); border-radius: 10px; padding: 10px; position: absolute; z-index: 100; bottom: 125%; left: 50%; transform: translateX(-50%); transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 12px; pointer-events: none; }
     .comment-container:hover .comment-tooltip { visibility: visible; opacity: 1; }
-
-    /* Modal */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
     .modal-content { background: var(--card-bg); width: 100%; max-width: 600px; border-radius: 20px; border: 1px solid var(--border-color); padding: 25px; max-height: 90vh; overflow-y: auto; }
 </style>
 
-<!-- 2. STATISTIKA BOXALARI (Backendda Context-ga moslash kerak) -->
+<!-- STATISTIKA BOXALARI -->
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-icon" style="background: rgba(62, 129, 246, 0.1); color: var(--accent-blue);"><i data-lucide="users"></i></div>
-        <h3>{{ total_count }}</h3>
-        <p>Jami Leadlar</p>
+        <h3>{{ total_count }}</h3><p>Jami Leadlar</p>
     </div>
     <div class="stat-card">
         <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;"><i data-lucide="clock"></i></div>
-        <h3>{{ new_count }}</h3>
-        <p>Yangi murojaatlar</p>
+        <h3>{{ new_count }}</h3><p>Yangi murojaatlar</p>
     </div>
     <div class="stat-card">
         <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;"><i data-lucide="user-x"></i></div>
-        <h3>{{ cancel_count }}</h3>
-        <p>Rad etilganlar</p>
+        <h3>{{ cancel_count }}</h3><p>Rad etilganlar</p>
     </div>
     <div class="stat-card">
         <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--accent-green);"><i data-lucide="check-circle"></i></div>
-        <h3>{{ student_count }}</h3>
-        <p>O'quvchi bo'ldi</p>
+        <h3>{{ student_count }}</h3><p>O'quvchi bo'ldi</p>
     </div>
 </div>
 
 <div class="toolbar-container">
     <form method="GET" class="search-group" id="filterForm">
-        {% csrf_token %} <!-- Muhim: JS CSRF token uchun kerak -->
+        {% csrf_token %}
         <div style="position: relative; flex: 1;">
             <i data-lucide="search" style="position: absolute; left: 15px; top: 14px; color: var(--text-muted);" size="18"></i>
             <input type="text" name="q" value="{{ query|default:'' }}" class="glass-input" placeholder="Ism yoki telefon..." style="padding-left: 45px;">
@@ -101,15 +66,19 @@
             <option value="">Barcha statuslar</option>
             <option value="new" {% if status_filter == 'new' %}selected{% endif %}>Yangi</option>
             <option value="first class" {% if status_filter == 'first class' %}selected{% endif %}>Birinchi dars</option>
-            <option value="viewed" {% if status_filter == 'viewed' %}selected{% endif %}>Ko'rilgan</option>
-            <option value="coming" {% if status_filter == 'coming' %}selected{% endif %}>Aniq keladi</option>
-            <option value="cancel" {% if status_filter == 'cancel' %}selected{% endif %}>Rad etdi</option>
             <option value="student" {% if status_filter == 'student' %}selected{% endif %}>O'quvchi</option>
+            <option value="cancel" {% if status_filter == 'cancel' %}selected{% endif %}>Rad etdi</option>
         </select>
     </form>
-    <button type="button" class="btn-add" onclick="openModal()" style="white-space: nowrap;">
-        <i data-lucide="user-plus"></i> Yangi murojaat
-    </button>
+
+    <div style="display: flex; gap: 10px;">
+        <!-- IMPORT TUGMASI -->
+        <form action="{% url 'import_leads' %}" method="POST" enctype="multipart/form-data" id="excelForm" style="display: none;">
+            {% csrf_token %}<input type="file" name="excel_file" id="excelInput" onchange="document.getElementById('excelForm').submit()">
+        </form>
+        <button type="button" class="btn-add" style="background: #10b981;" onclick="document.getElementById('excelInput').click()"><i data-lucide="upload"></i> Import</button>
+        <button type="button" class="btn-add" onclick="openModal('addLeadModal')"><i data-lucide="user-plus"></i> Yangi lead</button>
+    </div>
 </div>
 
 <div class="glass-panel" style="overflow-x: auto;">
@@ -118,7 +87,8 @@
             <tr>
                 <th>F.I.SH</th>
                 <th>Telefon</th>
-                <th>Kurs</th>
+                <th>Kim uchun?</th>
+                <th>Toshkentmi?</th>
                 <th>Izoh</th>
                 <th>Status</th>
                 <th>Sana</th>
@@ -130,37 +100,28 @@
             <tr>
                 <td>{{ lead.name }}</td>
                 <td style="white-space: nowrap;">{{ lead.phone }}</td>
-                <td>{{ lead.course }}</td>
+                <td>{{ lead.for_whom|default:"-" }}</td>
+                <td>{{ lead.is_from_tashkent|default:"-" }}</td>
                 <td>
                     {% if lead.comment %}
-                    <div class="comment-container">
-                        <i data-lucide="eye" size="14"></i>
-                        <div class="comment-tooltip">{{ lead.comment }}</div>
-                    </div>
+                    <div class="comment-container"><i data-lucide="eye" size="14"></i><div class="comment-tooltip">{{ lead.comment }}</div></div>
                     {% else %}-{% endif %}
                 </td>
                 <td>
-                    <select class="status-dynamic-select
-                        {% if lead.status == 'new' %}st-new
-                        {% elif lead.status == 'first class' %}st-first
-                        {% elif lead.status == 'viewed' %}st-viewed
-                        {% elif lead.status == 'coming' %}st-coming
-                        {% elif lead.status == 'cancel' %}st-cancel
-                        {% elif lead.status == 'student' %}st-student{% endif %}"
-                        data-id="{{ lead.id }}">
+                    <select class="status-dynamic-select {% if lead.status == 'new' %}st-new{% elif lead.status == 'student' %}st-student{% elif lead.status == 'cancel' %}st-cancel{% endif %}" data-id="{{ lead.id }}">
                         <option value="new" {% if lead.status == "new" %}selected{% endif %}>Yangi</option>
-                        <option value="first class" {% if lead.status == "first class" %}selected{% endif %}>Birinchi dars</option>
-                        <option value="viewed" {% if lead.status == "viewed" %}selected{% endif %}>Ko'rilgan</option>
-                        <option value="coming" {% if lead.status == "coming" %}selected{% endif %}>Aniq keladi</option>
-                        <option value="cancel" {% if lead.status == "cancel" %}selected{% endif %}>Rad etdi</option>
                         <option value="student" {% if lead.status == "student" %}selected{% endif %}>O'quvchi</option>
+                        <option value="cancel" {% if lead.status == "cancel" %}selected{% endif %}>Rad etdi</option>
                     </select>
                 </td>
                 <td style="font-size: 12px; color: var(--text-muted);">{{ lead.created_at|date:"d.m.Y" }}</td>
                 <td>
                     <div class="action-flex">
-                        <a href="#" class="btn-circle"><i data-lucide="edit-3" size="14"></i></a>
-                        <a href="#" class="btn-circle btn-delete"><i data-lucide="trash-2" size="14"></i></a>
+                        <!-- TAHRIRLASH TUGMASI -->
+                        <button class="btn-circle" onclick="openEditModal('{{ lead.id }}', '{{ lead.name|escapejs }}', '{{ lead.phone|escapejs }}', '{{ lead.for_whom|escapejs }}', '{{ lead.is_from_tashkent|escapejs }}', '{{ lead.course|escapejs }}', '{{ lead.source|escapejs }}', '{{ lead.comment|escapejs }}')">
+                            <i data-lucide="edit-3" size="14"></i>
+                        </button>
+                        <a href="{% url 'delete_lead' lead.pk %}" class="btn-circle btn-delete" onclick="return confirm('Ochirishni tasdiqlaysizmi?')"><i data-lucide="trash-2" size="14"></i></a>
                     </div>
                 </td>
             </tr>
@@ -169,78 +130,72 @@
     </table>
 </div>
 
-<!-- MODAL OYNA -->
+<!-- MODAL ADD -->
 <div id="addLeadModal" class="modal-overlay">
     <div class="modal-content">
-        <div class="modal-header">
-            <h2>Yangi murojaat</h2>
-            <button onclick="closeModal()" style="background:none; border:none; color:white; font-size:24px;">&times;</button>
-        </div>
+        <div class="modal-header"><h2>Yangi murojaat</h2><button onclick="closeModal('addLeadModal')" style="background:none; border:none; color:white; font-size:24px;">&times;</button></div>
         <form method="POST" action="{% url 'add_lead' %}">
             {% csrf_token %}
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
                 <input type="text" name="name" placeholder="F.I.SH" class="glass-input" required>
                 <input type="text" name="phone" placeholder="Telefon" class="glass-input" required>
+                <input type="text" name="for_whom" placeholder="Kim uchun?" class="glass-input">
+                <input type="text" name="is_from_tashkent" placeholder="Toshkentdanmi?" class="glass-input">
                 <input type="text" name="course" placeholder="Kurs" class="glass-input">
-                <input type="text" name="source" placeholder="Manba (Insta, Tel...)" class="glass-input">
+                <input type="text" name="source" placeholder="Manba" class="glass-input">
             </div>
             <textarea name="comment" placeholder="Izoh" class="glass-input" style="width: 100%; margin-top: 15px; height: 80px;"></textarea>
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                <button type="button" onclick="closeModal()" class="btn-circle" style="width: auto; padding: 0 20px;">Bekor qilish</button>
-                <button type="submit" class="btn-add">Saqlash</button>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;"><button type="button" onclick="closeModal('addLeadModal')" class="btn-circle" style="width: auto; padding: 0 20px;">Bekor</button><button type="submit" class="btn-add">Saqlash</button></div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div id="editLeadModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Tahrirlash</h2><button onclick="closeModal('editLeadModal')" style="background:none; border:none; color:white; font-size:24px;">&times;</button></div>
+        <form method="POST" id="editLeadForm">
+            {% csrf_token %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                <input type="text" name="name" id="e_name" class="glass-input" required>
+                <input type="text" name="phone" id="e_phone" class="glass-input" required>
+                <input type="text" name="for_whom" id="e_for_whom" class="glass-input">
+                <input type="text" name="is_from_tashkent" id="e_tashkent" class="glass-input">
+                <input type="text" name="course" id="e_course" class="glass-input">
+                <input type="text" name="source" id="e_source" class="glass-input">
             </div>
+            <textarea name="comment" id="e_comment" class="glass-input" style="width: 100%; margin-top: 15px; height: 80px;"></textarea>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;"><button type="button" onclick="closeModal('editLeadModal')" class="btn-circle" style="width: auto; padding: 0 20px;">Bekor</button><button type="submit" class="btn-add">Saqlash</button></div>
         </form>
     </div>
 </div>
 
 <script>
-    // 3. STATUSNI BAZADA O'ZGARTIRISH (AJAX TO'LIQ KOD)
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function openEditModal(id, name, phone, for_whom, tashkent, course, source, comment) {
+        document.getElementById('editLeadForm').action = `/lead/edit/${id}/`;
+        document.getElementById('e_name').value = name;
+        document.getElementById('e_phone').value = phone;
+        document.getElementById('e_for_whom').value = for_whom;
+        document.getElementById('e_tashkent').value = tashkent;
+        document.getElementById('e_course').value = course;
+        document.getElementById('e_source').value = source;
+        document.getElementById('e_comment').value = comment;
+        openModal('editLeadModal');
+    }
+
     document.querySelectorAll('.status-dynamic-select').forEach(select => {
         select.addEventListener('change', function() {
-            const clientId = this.dataset.id;
-            const newStatus = this.value;
-            const self = this;
-
-            // CSRF tokenni olish (Formadan olamiz)
             const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
             fetch("{% url 'change_status' %}", {
                 method: "POST",
-                headers: {
-                    "X-CSRFToken": csrftoken,
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: new URLSearchParams({
-                    'id': clientId,
-                    'status': newStatus
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // CSS klasslarni yangilash
-                    self.classList.remove('st-new', 'st-first', 'st-viewed', 'st-coming', 'st-cancel', 'st-student');
-                    const classMap = {
-                        'new': 'st-new', 'first class': 'st-first', 'viewed': 'st-viewed',
-                        'coming': 'st-coming', 'cancel': 'st-cancel', 'student': 'st-student'
-                    };
-                    self.classList.add(classMap[newStatus]);
-
-                    // Statistika boxlarini yangilash uchun sahifani reload qilsangiz ham bo'ladi yoki shunday qoldiring
-                    // location.reload();
-                } else {
-                    alert("Xato: " + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Xato:', error);
-                alert("Bazaga saqlanmadi!");
-            });
+                headers: { "X-CSRFToken": csrftoken, "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ 'id': this.dataset.id, 'status': this.value })
+            }).then(res => res.json()).then(data => { if(data.success) location.reload(); });
         });
     });
-
-    function openModal() { document.getElementById('addLeadModal').style.display = 'flex'; }
-    function closeModal() { document.getElementById('addLeadModal').style.display = 'none'; }
     lucide.createIcons();
 </script>
 {% endblock %}
